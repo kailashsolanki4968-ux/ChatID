@@ -40,7 +40,17 @@ jobs:
           curl -L "$URL" -o gradle.zip
           unzip -q gradle.zip
           echo "GRADLE_HOME=$(find . -maxdepth 1 -type d -name 'gradle-*' | head -1)" >> $GITHUB_ENV
-
+      - name: Create debug keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore "$PROJECT_DIR/debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
       - name: Build APK
         run: |
           cd "$PROJECT_DIR"
