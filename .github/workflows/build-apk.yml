@@ -20,20 +20,39 @@ jobs:
         run: |
           GRADLEW=$(find project -name gradlew -type f | head -1)
           if [ -z "$GRADLEW" ]; then
-            echo "gradlew not found in ChatID project"
+            echo "gradlew not found"
             exit 1
           fi
-          echo "GRADLEW=$GRADLEW" >> "$GITHUB_ENV"
-          echo "PROJECT_DIR=$(dirname "$GRADLEW")" >> "$GITHUB_ENV"
+          echo "GRADLEW=$GRADLEW" >> $GITHUB_ENV
+          echo "PROJECT_DIR=$(dirname "$GRADLEW")" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Gradle
+        run: |
+          PROP="$PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties"
+          URL=$(grep '^distributionUrl=' "$PROP" | cut -d= -f2- | sed 's/\\:/:/g')
+          echo "Gradle URL: $URL"
+          curl -L "$URL" -o gradle.zip
+          unzip -q gradle.zip
+          echo "GRADLE_HOME=$(find . -maxdepth 1 -type d -name 'gradle-*' | head -1)" >> $GITHUB_ENV
 
       - name: Build APK
         run: |
           cd "$PROJECT_DIR"
-          chmod +x ./gradlew
-          ./gradlew assembleDebug
+          chmod +x gradlew
+          "$GITHUB_WORKSPACE/$GRADLE_HOME/bin/gradle" assembleDebug --no-daemon
+
+      - name: Find APK
+        run: |
+          find "$PROJECT_DIR" -name "*.apk" -type f
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ChatID-APK
-          path: project/**/build/outputs/apk/**/*.apk
+          path: ${{ env.PROJECT_DIR }}/**/build/outputs/apk/**/*.apk
