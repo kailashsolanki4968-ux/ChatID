@@ -44,7 +44,7 @@ jobs:
       - name: Build APK
         run: |
           cd "$PROJECT_DIR"
-          chmod +x gradlew
+          
           "$GITHUB_WORKSPACE/$GRADLE_HOME/bin/gradle" assembleDebug --no-daemon
 
       - name: Find APK
