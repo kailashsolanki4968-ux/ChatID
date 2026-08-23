@@ -35,7 +35,7 @@ jobs:
       - name: Download Gradle
         run: |
           PROP="$PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties"
-          URL=$(grep '^distributionUrl=' "$PROP" | cut -d= -f2- | sed 's/\\:/:/g')
+        URL="https://services.gradle.org/distributions/gradle-9.3.1-bin.zip"
           echo "Gradle URL: $URL"
           curl -L "$URL" -o gradle.zip
           unzip -q gradle.zip
